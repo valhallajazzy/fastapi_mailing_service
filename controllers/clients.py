@@ -18,7 +18,7 @@ def get_client_db(db: Session, client_id: int):
     return client
 
 
-def register_client_db(db: Session, client_data: ClientCreate):
+def create_client_db(db: Session, client_data: ClientCreate):
     if db.scalar(select(Client).where(Client.phone_number == client_data.phone_number)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

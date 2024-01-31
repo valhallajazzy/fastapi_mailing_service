@@ -37,7 +37,7 @@ class Mailing(Base):
     stop_mailing: Mapped[datetime]
     text: Mapped[str]
     tag: Mapped[Optional[str]]
-    operator_code: Mapped[int]
+    operator_code: Mapped[Optional[int]]
 
     messages: Mapped[list["Message"]] = relationship(
         back_populates="mailing"

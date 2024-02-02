@@ -1,0 +1,9 @@
+fastapi==0.109.0
+uvicorn==0.27.0
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+alembic==1.13.1
+pydantic-extra-types==2.4.1
+python-dotenv==1.0.1
+phonenumbers==8.13.29
+pytz==2023.4

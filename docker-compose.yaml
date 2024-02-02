@@ -1,0 +1,34 @@
+version: "3.0"
+services:
+  db:
+    container_name: db
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=fastapi_mailing_service
+    ports:
+      - "5432:5432"
+    networks:
+      - custom
+
+  app:
+    build:
+      context: .
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./mailing_service:/mailing_service
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    command: >
+     sh -c "alembic upgrade head && uvicorn main:app --reload --port 8001"
+    depends_on:
+      - db
+
+
+
+networks:
+  custom:
+    driver: bridge

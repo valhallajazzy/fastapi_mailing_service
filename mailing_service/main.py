@@ -15,3 +15,8 @@ app.include_router(
     router=mailing_routers,
     prefix='/mailing'
 )
+
+app.include_router(
+    router=...,
+    prefix=...
+)

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from models import schemas
@@ -15,12 +16,12 @@ def get_client(client_id: int, db: Session = Depends(get_db)):
 
 
 @router.post('/create', status_code=201)
-def create_client(client_data: schemas.ClientCreate, db: Session = Depends(get_db)):
-    return create_client_db(db=db, client_data=client_data)
+async def create_client(client_data: schemas.ClientCreate, db: AsyncSession = Depends(get_db)):
+    return await create_client_db(db=db, client_data=client_data)
 
 
 @router.patch('/update', status_code=200)
-def update_client(client_data: schemas.ClientUpdate, db: Session = Depends(get_db)):
+def update_client(client_data: schemas.ClientUpdate, db: AsyncSession = Depends(get_db)):
     return update_client_db(db=db, client_data=client_data)
 
 

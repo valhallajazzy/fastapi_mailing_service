@@ -7,6 +7,7 @@ EXPOSE 8001
 
 RUN pip3 install --upgrade pip
 RUN pip3 install -r /temp/requirements.txt
+
 RUN adduser --disabled-password service-user
 USER service-user
 

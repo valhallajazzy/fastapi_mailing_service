@@ -1,17 +1,16 @@
 version: "3.0"
 services:
   db:
-    container_name: db
-    image: postgres:14.1-alpine
-    restart: always
+    image: postgres:14.6
+    container_name: mailing_db
+#    restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=fastapi_mailing_service
-    ports:
-      - "5432:5432"
-    networks:
-      - custom
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "db_docker"
+      POSTGRES_HOST_AUTH_METHOD: trust
+    expose:
+      - 5432
 
   app:
     build:
@@ -23,12 +22,47 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL}
     command: >
-     sh -c "alembic upgrade head && uvicorn main:app --reload --port 8001"
+     sh -c "alembic upgrade head && uvicorn main:app --reload --host 0.0.0.0 --port 8001"
     depends_on:
       - db
+      - redis
 
+  redis:
+    container_name: redis
+    image: redis:7.0.5-alpine
+    hostname: redis
+    expose:
+      - 6379
 
+  celery_worker:
+    container_name: celery_worker
+    build:
+      context: .
+    command: >
+     sh -c "celery -A tasks.tasks.celery worker --loglevel=info"
+    volumes:
+      - ./mailing_service:/mailing_service
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+    links:
+      - redis
+    depends_on:
+      - app
+      - redis
 
-networks:
-  custom:
-    driver: bridge
+  flower:
+    container_name: flower
+    build:
+      context: .
+    command: >
+     sh -c "celery -A tasks.tasks.celery flower --port=5555"
+    ports:
+      - 5556:5555
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+    depends_on:
+      - app
+      - redis
+      - celery_worker

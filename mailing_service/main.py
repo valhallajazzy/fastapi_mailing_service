@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from routers.clients import router as client_routers
 from routers.mailings import router as mailing_routers
+from routers.execute_mailing import router as execute_mailing_routers
 
 app = FastAPI()
 
@@ -17,6 +18,6 @@ app.include_router(
 )
 
 app.include_router(
-    router=...,
-    prefix=...
+    router=execute_mailing_routers,
+    prefix='/execute_mailing'
 )

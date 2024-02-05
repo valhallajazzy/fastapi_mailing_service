@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -11,8 +10,8 @@ router = APIRouter()
 
 
 @router.get('/{client_id}', status_code=200)
-def get_client(client_id: int, db: Session = Depends(get_db)):
-    return get_client_db(db=db, client_id=client_id)
+async def get_client(client_id: int, db: AsyncSession = Depends(get_db)):
+    return await get_client_db(db=db, client_id=client_id)
 
 
 @router.post('/create', status_code=201)
@@ -21,10 +20,10 @@ async def create_client(client_data: schemas.ClientCreate, db: AsyncSession = De
 
 
 @router.patch('/update', status_code=200)
-def update_client(client_data: schemas.ClientUpdate, db: AsyncSession = Depends(get_db)):
-    return update_client_db(db=db, client_data=client_data)
+async def update_client(client_data: schemas.ClientUpdate, db: AsyncSession = Depends(get_db)):
+    return await update_client_db(db=db, client_data=client_data)
 
 
 @router.delete('/delete', status_code=status.HTTP_204_NO_CONTENT)
-def delete_client(client_data: schemas.ClientBase, db: Session = Depends(get_db)):
-    return delete_client_db(client_data=client_data, db=db)
+async def delete_client(client_data: schemas.ClientBase, db: AsyncSession = Depends(get_db)):
+    return await delete_client_db(client_data=client_data, db=db)

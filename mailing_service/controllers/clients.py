@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from starlette.exceptions import HTTPException
 
@@ -8,8 +8,8 @@ from models.schemas import ClientCreate, ClientUpdate, ClientBase
 import phonenumbers
 
 
-def get_client_db(db: Session, client_id: int):
-    client = db.scalar(select(Client).where(Client.id == client_id))
+async def get_client_db(db: AsyncSession, client_id: int):
+    client = await db.scalar(select(Client).where(Client.id == client_id))
     if not client:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -18,8 +18,8 @@ def get_client_db(db: Session, client_id: int):
     return client
 
 
-def create_client_db(db: Session, client_data: ClientCreate):
-    if db.scalar(select(Client).where(Client.phone_number == client_data.phone_number)):
+async def create_client_db(db: AsyncSession, client_data: ClientCreate):
+    if await db.scalar(select(Client).where(Client.phone_number == client_data.phone_number)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Phone {client_data.phone_number} already exist!"
@@ -30,15 +30,15 @@ def create_client_db(db: Session, client_data: ClientCreate):
     client.tag = client_data.tag
     client.time_zone = client_data.time_zone
     db.add(client)
-    db.commit()
+    await db.commit()
     return {
         "id": client.id,
         "phone_number": client.phone_number
     }
 
 
-def update_client_db(db: Session, client_data: ClientUpdate):
-    client = db.scalar(select(Client).where(Client.phone_number == client_data.phone_number))
+async def update_client_db(db: AsyncSession, client_data: ClientUpdate):
+    client = await db.scalar(select(Client).where(Client.phone_number == client_data.phone_number))
     if not client:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -46,7 +46,7 @@ def update_client_db(db: Session, client_data: ClientUpdate):
         )
     for name, value in client_data.model_dump(exclude_unset=True).items():
         setattr(client, name, value)
-    db.commit()
+    await db.commit()
     return {
         "phone_number": client.phone_number,
         "tag": client.tag,
@@ -54,13 +54,13 @@ def update_client_db(db: Session, client_data: ClientUpdate):
     }
 
 
-def delete_client_db(db: Session, client_data: ClientBase):
-    client = db.scalar(select(Client).where(Client.phone_number == client_data.phone_number))
+async def delete_client_db(db: AsyncSession, client_data: ClientBase):
+    client = await db.scalar(select(Client).where(Client.phone_number == client_data.phone_number))
     if not client:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Phone {client_data.phone_number} not found!"
         )
-    db.delete(client)
-    db.commit()
+    await db.delete(client)
+    await db.commit()
 
